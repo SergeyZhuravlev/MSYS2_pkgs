@@ -1,0 +1,39 @@
+# Maintainer: Sergey Zhuravlev <sergey4zhuravlev@gmail.com>
+
+_realname=fdk-aac
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=0.1.5
+pkgrel=0
+pkgdesc="A standalone library of the Fraunhofer FDK AAC code from Android (mingw-w64)"
+arch=('any')
+makedepends=("${MINGW_PACKAGE_PREFIX}-gcc")
+url="https://github.com/mstorsjo/fdk-aac"
+license=('custom')
+options=('staticlibs' 'strip' 'libtool')
+source=("${url}/archive/v${pkgver}.tar.gz")
+md5sums=('31b24e44febb20a26e71ca21d1562a8f')
+
+prepare() {
+  cd "${srcdir}/${_realname}-${pkgver}/"
+  ./autogen.sh
+}
+
+build() {
+  [[ -d "build-${MINGW_CHOST}" ]] && rm -rf "build-${MINGW_CHOST}"
+  mkdir -p "${srcdir}/build-${MINGW_CHOST}"
+  cd "${srcdir}/build-${MINGW_CHOST}"
+  "../${_realname}-${pkgver}/configure" \
+    --prefix="${MINGW_PREFIX}" \
+    --enable-shared \
+    --enable-static
+
+  make
+}
+
+package() {
+  cd "${srcdir}/build-${MINGW_CHOST}"
+  make DESTDIR="${pkgdir}" install
+  mkdir -p "/${pkgdir}/share/licenses/${pkgname}"
+  cp "${srcdir}/${_realname}-${pkgver}/NOTICE" "/${pkgdir}/share/licenses/${pkgname}/LICENSE"
+}
