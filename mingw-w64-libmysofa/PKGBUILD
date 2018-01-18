@@ -1,0 +1,37 @@
+# Maintainer: Sergey Zhuravlev <sergey4zhuravlev@gmail.com>
+
+_realname=libmysofa
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=0.5
+_pkgver_internal=0.6
+pkgrel=0
+pkgdesc="This is a simple set of C functions to read AES SOFA files, if they contain HRTFs stored according to the AES69-2015 standard  (mingw-w64)"
+arch=('any')
+makedepends=("${MINGW_PACKAGE_PREFIX}-gcc" "${MINGW_PACKAGE_PREFIX}-cmake" "${MINGW_PACKAGE_PREFIX}-zlib")
+url="https://github.com/hoene/${_realname}"
+license=('custom')
+options=('staticlibs' 'strip')
+source=("${url}/archive/v${_pkgver_internal}.tar.gz"
+		"001-fix-building-for-msys2-environment.patch")
+md5sums=('9d595f890b93693a796835d43cf276ec'
+         '6d7ec39fd90cfa88c3204440c7e89b66')
+
+prepare() {
+  cd ${srcdir}/${_realname}-${_pkgver_internal}/src
+  patch -p0 -l -i ${srcdir}/001-fix-building-for-msys2-environment.patch
+}
+
+build() {
+[[ -d "${srcdir}/${_realname}-${_pkgver_internal}/build" ]] && rm -rf "${srcdir}/${_realname}-${_pkgver_internal}/build"
+  mkdir -p "${srcdir}/${_realname}-${_pkgver_internal}/build"
+  cd "${srcdir}/${_realname}-${_pkgver_internal}/build"
+  cmake -DCMAKE_INSTALL_PREFIX="" -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=0 -G"MSYS Makefiles" -DBUILD_SHARED_LIBS=TRUE .. 
+  make
+}
+
+package() {
+  cd "${srcdir}/${_realname}-${_pkgver_internal}/build"
+  make DESTDIR="${pkgdir}/${MINGW_PREFIX}" PREFIX="" install
+  install -v -D "${srcdir}/${_realname}-${_pkgver_internal}/LICENSE" "${pkgdir}/${MINGW_PREFIX}/share/licenses/${_realname}-${pkgver}/LICENSE"
+}
