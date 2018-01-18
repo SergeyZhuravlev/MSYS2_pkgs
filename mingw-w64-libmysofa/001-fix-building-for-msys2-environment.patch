@@ -1,0 +1,22 @@
+--- CMakeLists.txt	2017-07-11 14:36:33 +0300
++++ CMakeLists.txt	2018-01-13 22:07:23 +0300
+@@ -12,6 +12,11 @@
+ 
+ configure_file (config.h.in ${CMAKE_SOURCE_DIR}/src/config.h)
+ 
++if($ENV{MSYSTEM})
++  include(FindZLIB)
++  set(MATH "")
++else()
++
+ if(NOT WIN32)
+   find_library(MATH m)
+   include(FindZLIB)
+@@ -42,6 +47,7 @@
+     include_directories(${CMAKE_SOURCE_DIR}/windows/third-party/zlib-1.2.11/include/)
+ endif()
+ 
++endif()
+ 
+ set(libsrc hrtf/reader.c hdf/superblock.c hdf/dataobject.c hdf/btree.c hdf/fractalhead.c hdf/gunzip.c hdf/gcol.c hrtf/check.c hrtf/spherical.c 
+   hrtf/lookup.c hrtf/tools.c hrtf/kdtree.c hrtf/neighbors.c hrtf/interpolate.c hrtf/resample.c hrtf/loudness.c hrtf/minphase.c hrtf/easy.c hrtf/cache.c 
